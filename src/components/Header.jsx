@@ -5,8 +5,7 @@ import { useNavigate } from "react-router-dom";
 export default function Header() {
     const navigate = useNavigate();
     const location = useLocation();
-    function pathMathRoute (route){
-        debugger;
+    function pathMathRoute (route){       
         if (route === location.pathname)
         return true;
     }      
