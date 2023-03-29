@@ -59,11 +59,9 @@ password:""
                         <button type="button" className='w-full text-center bg-red-500 rounded flex items-center justify-center
                         py-3 mt-5 text-sm font-medium text-white uppercase'><FcGoogle className='bg-white rounded-lg mr-2 text-lg'/>
                         continue with google</button>
-                </form>
-                
+                </form>               
             </div>
-        </div>
-      
+        </div>      
     </section>
   )
 }
