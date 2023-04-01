@@ -2,6 +2,11 @@ import  { useState } from 'react'
 import { AiFillEyeInvisible, AiFillEye } from 'react-icons/ai'
 import { FcGoogle } from 'react-icons/fc'
 import { Link } from 'react-router-dom';
+import { getAuth, createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
+import { db } from '../firebase';
+import { doc, serverTimestamp, setDoc } from 'firebase/firestore';
+import { toast } from 'react-toastify';
+import { useNavigate } from 'react-router-dom';
 export default function SignUp() {
     const [formData, setFormData] = useState({
 email:"",
@@ -9,11 +14,30 @@ password:"",
 name:""
     })
     const {email,password,name} = formData ;
+    const navigate = useNavigate();
     function changeForm(e){
     setFormData({...formData,[e.target.id]:e.target.value})
     }
-    function signUpSubmit(e){
+   async function signUpSubmit(e){
         e.preventDefault();
+        try {         
+            const auth = getAuth(); 
+            const userCredential = await createUserWithEmailAndPassword(auth, email, password)               
+                // Signed in 
+                updateProfile(auth.currentUser,{
+                    displayName:name
+                })
+                const user = userCredential.user;
+                const formDataCopy = {...formData};
+                delete formDataCopy.password;
+                formDataCopy.timeStamp = serverTimestamp();
+               await setDoc(doc(db, "users", user.uid), formDataCopy);
+            //    toast.success("Sign up was Successful")
+               navigate("/")
+                // ...
+            } catch (error) {
+                toast.error("some thing went wrong when registration")
+        }
     }
     const [showPassword , setShowPassword] = useState(false)
   return (
@@ -25,7 +49,7 @@ name:""
             alt="key" className='w-full rounded-2xl'/>
             </div>
             <div className='w-full md:w-8/12 lg:w-5/12 lg:ml-20'>
-                <form>
+                <form onSubmit={signUpSubmit}>
                 <input className='w-full px-4 py-2 mb-5 text-gray-700 font-medium text-xl border-gray-300 rounded
                      bg-white transition ease-in-out'                     
                     type="text" id="name" placeholder='Full name' onChange={changeForm}
