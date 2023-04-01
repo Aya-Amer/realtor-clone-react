@@ -1,7 +1,6 @@
 import  { useState } from 'react'
-
-import { FcGoogle } from 'react-icons/fc'
 import { Link } from 'react-router-dom';
+import OAuth from '../components/OAuth';
 export default function ForgotPassword() {
     const [emailData, setEmailData] = useState({
 email:"",
@@ -40,9 +39,7 @@ email:"",
                     before:border-gray-300 after:border-t after:flex-1
                     after:border-gray-300'><p className='text-center font-semibold mx-4'>
                         OR</p></div>
-                        <button type="button" className='w-full text-center bg-red-500 rounded flex items-center justify-center
-                        py-3 mt-5 text-sm font-medium text-white uppercase'><FcGoogle className='bg-white rounded-lg mr-2 text-lg'/>
-                        continue with google</button>
+                        <OAuth/>
                 </form>               
             </div>
         </div>      

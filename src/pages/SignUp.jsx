@@ -1,12 +1,13 @@
 import  { useState } from 'react'
 import { AiFillEyeInvisible, AiFillEye } from 'react-icons/ai'
-import { FcGoogle } from 'react-icons/fc'
+
 import { Link } from 'react-router-dom';
 import { getAuth, createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { db } from '../firebase';
 import { doc, serverTimestamp, setDoc } from 'firebase/firestore';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
+import OAuth from '../components/OAuth';
 export default function SignUp() {
     const [formData, setFormData] = useState({
 email:"",
@@ -85,9 +86,7 @@ name:""
                     before:border-gray-300 after:border-t after:flex-1
                     after:border-gray-300'><p className='text-center font-semibold mx-4'>
                         OR</p></div>
-                        <button type="button" className='w-full text-center bg-red-500 rounded flex items-center justify-center
-                        py-3 mt-5 text-sm font-medium text-white uppercase'><FcGoogle className='bg-white rounded-lg mr-2 text-lg'/>
-                        continue with google</button>
+                    <OAuth/>    
                 </form>                
             </div>
         </div>      

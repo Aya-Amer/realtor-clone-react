@@ -1,7 +1,10 @@
 import  { useState } from 'react'
 import { AiFillEyeInvisible, AiFillEye } from 'react-icons/ai'
-import { FcGoogle } from 'react-icons/fc'
+
 import { Link } from 'react-router-dom';
+import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+import { toast } from 'react-toastify';
+import OAuth from '../components/OAuth';
 export default function SignIn() {
     const [formData, setFormData] = useState({
 email:"",
@@ -11,8 +14,17 @@ password:""
     function changeForm(e){
     setFormData({...formData,[e.target.id]:e.target.value})
     }
-    function signInSubmit(e){
+   async function signInSubmit(e){
         e.preventDefault();
+        try {
+            const auth = getAuth();
+            const userCredential = await signInWithEmailAndPassword(auth, email, password)
+            const user = userCredential.user;
+            console.log(user)
+        } catch (error) {
+            toast.error("some thing went wrong when sign in")
+        }
+        
         
     }
     const [showPassword , setShowPassword] = useState(false)
@@ -57,9 +69,7 @@ password:""
                     before:border-gray-300 after:border-t after:flex-1
                     after:border-gray-300'><p className='text-center font-semibold mx-4'>
                         OR</p></div>
-                        <button type="button" className='w-full text-center bg-red-500 rounded flex items-center justify-center
-                        py-3 mt-5 text-sm font-medium text-white uppercase'><FcGoogle className='bg-white rounded-lg mr-2 text-lg'/>
-                        continue with google</button>
+                        <OAuth/>
                 </form>               
             </div>
         </div>      
