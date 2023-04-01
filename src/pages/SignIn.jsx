@@ -5,12 +5,14 @@ import { Link } from 'react-router-dom';
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import { toast } from 'react-toastify';
 import OAuth from '../components/OAuth';
+import { useNavigate } from 'react-router-dom';
 export default function SignIn() {
     const [formData, setFormData] = useState({
 email:"",
 password:""
     })
     const {email,password} = formData ;
+    const navigate = useNavigate();
     function changeForm(e){
     setFormData({...formData,[e.target.id]:e.target.value})
     }
@@ -19,8 +21,10 @@ password:""
         try {
             const auth = getAuth();
             const userCredential = await signInWithEmailAndPassword(auth, email, password)
-            const user = userCredential.user;
-            console.log(user)
+            if(userCredential.user){
+                navigate("/")  
+            }
+            
         } catch (error) {
             toast.error("some thing went wrong when sign in")
         }
@@ -37,7 +41,7 @@ password:""
             alt="key" className='w-full rounded-2xl'/>
             </div>
             <div className='w-full md:w-8/12 lg:w-5/12 lg:ml-20'>
-                <form>
+                <form onSubmit={signInSubmit}>
                     <input className='w-full px-4 py-2 text-gray-700 font-medium text-xl border-gray-300 rounded
                      bg-white transition ease-in-out'                     
                     type="text" id="email" placeholder='Email address' onChange={changeForm}
@@ -62,7 +66,7 @@ password:""
                                 Forgot password?</Link></p> </div>
                         
                     </div>
-                    <button type="submit" onSubmit={signInSubmit}
+                    <button type="submit" 
                     className='uppercase bg-blue-600 rounded w-full py-3 px-7 text-sm font-medium text-center mt-5 text-white'>
                     sign in</button>
                     <div className='flex my-4 items-center before:border-t before:flex-1
