@@ -1,6 +1,9 @@
-import { getAuth } from 'firebase/auth';
+import { getAuth, updateProfile } from 'firebase/auth';
+import { doc, updateDoc } from 'firebase/firestore';
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import { db } from '../firebase';
 
 export default function Profile() {
   const navigate = useNavigate();
@@ -19,8 +22,32 @@ const {name,email} = formData;
   function editClicked() {
     setEditMode((preValue) => !preValue);
   }
-  function ApplyChange(){
+  async function ApplyChange(e){
     setEditMode((preValue) => !preValue);
+    try {
+      if(auth.currentUser.displayName != name){
+        // update profile data in Authentication
+      await  updateProfile(auth.currentUser,{
+          displayName:name
+      })
+      // update profile data in fire store
+      const docRef = doc(db,"users",auth.currentUser.uid);
+      await updateDoc(docRef, {
+        name,
+      })
+      toast.success("complete updated successful")
+      }
+      
+    } catch (error) {
+      toast.error("Could not update the profile details")
+    }
+   
+  }
+  function onChangeName (e){
+    setFormData((preValue)=>({
+      ...preValue,
+      [e.target.id]:e.target.value,
+    }))
   }
   return (
     <>
@@ -28,9 +55,9 @@ const {name,email} = formData;
       <h1 className='text-center font-bold text-3xl mt-6'>My Profile</h1>
       <div className='w-full md:w-[50%] mt-6 px-3'>
       <form  >
-        <input placeholder='Full Name' type='text' id='name' value={name} disabled
-        className={ editMode ? 'bg-red-200 w-full c transition ease-in-out border-gray-300 border rounded text-gray-700' 
-        : 'bg-white w-full border-gray-300 border py-2 px-3 rounded text-gray-700'} 
+        <input placeholder='Full Name' type='text' id='name' onChange={onChangeName} value={name} disabled={!editMode}
+        className={ ` w-full border-gray-300 border py-2 px-3 rounded text-gray-700 
+        ${editMode && "bg-red-200 focus:bg-red-200"}`} 
          />
         <input className='bg-white w-full mb-6 py-2 px-4 border-gray-300 border 
          rounded text-gray-700 my-5' value={email} id="email" disabled/>
