@@ -24,7 +24,7 @@ export default function Header() {
       })
     }, [auth])   
   return (
-    <div className='bg-white shadow-sm border-b top-0 sticky z-50'>    
+    <div className='bg-white shadow-sm border-b top-0 sticky z-40'>    
     <header className='max-w-6xl flex justify-between items-center px-3 mx-auto'>
       <div><img className="h-5 cursor-pointer" src="https://static.rdc.moveaws.com/images/logos/rdc-logo-default.svg"
        alt="logo" 
