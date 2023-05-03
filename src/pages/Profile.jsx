@@ -1,9 +1,10 @@
 import { getAuth, updateProfile } from 'firebase/auth';
 import { doc, updateDoc } from 'firebase/firestore';
 import React, { useState } from 'react'
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { db } from '../firebase';
+import { FcHome } from 'react-icons/fc';
 
 export default function Profile() {
   const navigate = useNavigate();
@@ -49,6 +50,9 @@ const {name,email} = formData;
       [e.target.id]:e.target.value,
     }))
   }
+  function onSellOrRentHouse(){
+
+  }
   return (
     <>
     <section className='mx-auto max-w-6xl flex justify-center items-center flex-col'>
@@ -70,6 +74,14 @@ const {name,email} = formData;
           <button type="button"  onClick={onSignOut}
           className='text-blue-600  hover:text-blue-700 transition ease-in-out duration-200 cursor-pointer'>Sign out</button>
         </div>
+        
+        <button type='submit' onClick={onSellOrRentHouse}
+        className=' w-full flex justify-center items-center py-3 px-7 text-sm font-medium shadow-md
+         text-white hover:shadow-lg active:bg-blue-800 bg-blue-600 hover:bg-blue-700 border rounded 
+         transition ease-in-out duration-200 cursor-pointer uppercase'>
+          <Link to="/create-listing" className="flex justify-center items-center">
+          <FcHome className='mr-2 text-3xl bg-red-200 p-1 rounded-full border-2'/>sell or rent your house </Link>
+        </button>
         
       </form>
       </div>
