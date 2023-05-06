@@ -1,5 +1,13 @@
 import React, { useState } from 'react'
+import { toast } from 'react-toastify';
+import Spinner from '../components/Spinner';
+import { getAuth } from "firebase/auth";
+import { v4 as uuidv4 } from "uuid";
+import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 export default function CreateListing() {
+    const auth = getAuth();
+    const [loading, setLoading] = useState(false);
+    const [geolocationEnabled,setGeolocationEnabled] = useState(false);
     const [formData,setFormData] = useState({
         type:"rent",
         name:"",
@@ -12,19 +20,104 @@ export default function CreateListing() {
         offer:false,
         regularPrice:0,
         discountPrice:0,
+        images:{},
+        Geolocation:false,
+        latitude:0,
+        longitude:0,
+        
     });
-    const {type, name, bedRoom, bathRoom, parkingSpot, furnished, address, description, offer, regularPrice, discountPrice} = formData;
+    const {type, name, bedRoom, bathRoom, parkingSpot, furnished, address, description, offer, regularPrice, discountPrice, images, latitude, longitude} = formData;
     function  onChange (e){
-        debugger;
+        let Boolean = null;
+        if (e.target.value === "true")
+        Boolean = true;
+        else if (e.target.value === "false")
+        Boolean = false;
+   
+    // Files
+    if (e.target.files) {
+        setFormData((prevState) => ({
+          ...prevState,
+          images: e.target.files,
+        }));
+      }
+    if (!e.target.files) {
     setFormData((prevData)=>({
         ...prevData,
-        [e.target.id]:e.target.value, 
+        [e.target.id]:Boolean ?? e.target.value, 
     }))
+}
+    }
+   async function onSubmit(e){
+        e.preventDefault()
+        if (offer && +discountPrice >= +regularPrice){
+            setLoading(false);
+            toast.error("Discounted price needs to be less than regular price")
+            return 
+        }
+        if (images.length > 6){
+            setLoading(false);
+            toast.error("maximum 6 images are allowed")
+            return 
+        }
+        // manual geoLocation 
+        let geolocation = {};
+        geolocation.lat=latitude;
+        geolocation.lng=longitude;
+        
+       async function storeImage(image){
+        return new Promise((resolve, reject) => {
+            const storage = getStorage();
+            const filename = `${auth.currentUser.uid}-${image.name}-${uuidv4()}`;
+            const storageRef = ref(storage, filename);
+            const uploadTask = uploadBytesResumable(storageRef, image);
+            uploadTask.on('state_changed', 
+                (snapshot) => {
+                // Observe state change events such as progress, pause, and resume
+                // Get task progress, including the number of bytes uploaded and the total number of bytes to be uploaded
+                const progress = 
+                (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                console.log('Upload is ' + progress + '% done');
+                switch (snapshot.state) {
+                case 'paused':
+                    console.log('Upload is paused');
+                    break;
+                case 'running':
+                    console.log('Upload is running');
+                    break;
+                }
+            }, 
+            (error) => {
+                // Handle unsuccessful uploads
+                reject(error);
+            }, 
+            () => {
+                // Handle successful uploads on complete
+                // For instance, get the download URL: https://firebasestorage.googleapis.com/...
+                getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+                    resolve(downloadURL);
+                });
+            }
+    
+    );
+})
+        }
+        const imgUrls = await Promise.all (
+        [...images].map((image)=>storeImage(image)).catch((error)=>{
+            setLoading(false);
+            toast.error("Images not uploaded");
+            return;
+        })
+        )        
+    }
+    
+    if(loading){
+        return <Spinner/>;
     }
   return (
     <main className="mx-auto max-w-md px-2">
         <h1 className="text-center w-full font-bold text-3xl">Create a Listing</h1>
-        <form>            
+        <form onSubmit={onSubmit}>            
             <p className="text-lg mt-6 font-semibold">Sell/Rent</p>
             <div className='flex justify-around w-full gap-5'>
                 <button type="button" id="type" value="sell" onClick={onChange} className=
@@ -67,8 +160,24 @@ export default function CreateListing() {
             <p className="text-lg mt-6 font-semibold">Address</p> 
             <textarea type='text' maxLength="250" id="address" value={address} onChange={onChange} placeholder='Address'
             className="w-full text-md shadow-md font-semibold border rounded py-2 bg-white text-black px-4
-             focus:border-slate-600 focus:text-gray-700 focus:bg-white border-gray-300 transition ease-in-out 
-             duration-150 "/>   
+            focus:border-slate-600 focus:text-gray-700 focus:bg-white border-gray-300 transition ease-in-out 
+            duration-150 "/> 
+            {!geolocationEnabled && 
+            (<div className="flex space-x-6">
+                <div>
+                    <p className="text-lg mt-6 font-semibold">Latitude</p>
+                    <input type="number" min="-90" max="90"
+                     id="latitude" className='focus:border-slate-600 focus:text-gray-700 focus:bg-white px-4 
+                     py-1 text-xl w-full text-gray-700 bg-white transition ease-in-out duration-150 border
+                     border-gray-300 rounded text-center' />
+                </div>
+                <div>
+                    <p className="text-lg mt-6 font-semibold">Longitude</p>
+                    <input type="number"  id="longitude" min="-180" max="180" className='focus:border-slate-600
+                     focus:text-gray-700 focus:bg-white px-4 py-1 text-xl w-full text-gray-700 bg-white 
+                     transition ease-in-out duration-150 border border-gray-300 rounded text-center' />
+                </div>
+            </div>)}  
              <p className="text-lg mt-6 font-semibold">Description</p> 
             <textarea type='text' maxLength="250" id="description" value={description} onChange={onChange} placeholder='Description'
             className="w-full text-md shadow-md font-semibold border rounded py-2 bg-white text-black px-4
