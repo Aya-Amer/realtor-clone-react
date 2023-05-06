@@ -4,8 +4,12 @@ import Spinner from '../components/Spinner';
 import { getAuth } from "firebase/auth";
 import { v4 as uuidv4 } from "uuid";
 import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
+import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
+import { db } from "../firebase";
+import { useNavigate } from "react-router-dom";
 export default function CreateListing() {
     const auth = getAuth();
+    const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
     const [geolocationEnabled,setGeolocationEnabled] = useState(false);
     const [formData,setFormData] = useState({
@@ -103,12 +107,28 @@ export default function CreateListing() {
 })
         }
         const imgUrls = await Promise.all (
-        [...images].map((image)=>storeImage(image)).catch((error)=>{
+            [...images].map((image) => storeImage(image))
+          ).catch((error) => {
             setLoading(false);
             toast.error("Images not uploaded");
             return;
-        })
-        )        
+          }); 
+        console.log(imgUrls, "imgUrls")
+        const formDataCopy={
+            ...formData,
+            imgUrls,
+            geolocation,
+            timestamp: serverTimestamp(),
+            userRef: auth.currentUser.uid,
+        }; 
+        delete formDataCopy.images;
+        delete formDataCopy.latitude;
+        delete formDataCopy.longitude;
+        ! formDataCopy.offer && delete formDataCopy.discountedPrice;
+        const docRef = await addDoc(collection(db,"listings"), formDataCopy)   
+        setLoading(false);
+        toast.success("Listing created");
+        navigate(`/category/${formDataCopy.type}/${docRef.id}`); 
     }
     
     if(loading){
@@ -166,16 +186,17 @@ export default function CreateListing() {
             (<div className="flex space-x-6">
                 <div>
                     <p className="text-lg mt-6 font-semibold">Latitude</p>
-                    <input type="number" min="-90" max="90"
-                     id="latitude" className='focus:border-slate-600 focus:text-gray-700 focus:bg-white px-4 
+                    <input type="number" min="-90" max="90" required id="latitude"
+                    className='focus:border-slate-600 focus:text-gray-700 focus:bg-white px-4 
                      py-1 text-xl w-full text-gray-700 bg-white transition ease-in-out duration-150 border
                      border-gray-300 rounded text-center' />
                 </div>
                 <div>
                     <p className="text-lg mt-6 font-semibold">Longitude</p>
-                    <input type="number"  id="longitude" min="-180" max="180" className='focus:border-slate-600
-                     focus:text-gray-700 focus:bg-white px-4 py-1 text-xl w-full text-gray-700 bg-white 
-                     transition ease-in-out duration-150 border border-gray-300 rounded text-center' />
+                    <input type="number"  id="longitude" min="-180" max="180" required
+                    className='focus:border-slate-600 focus:text-gray-700 focus:bg-white px-4 py-1 text-xl 
+                    w-full text-gray-700 bg-white transition ease-in-out duration-150 border border-gray-300
+                    rounded text-center' />
                 </div>
             </div>)}  
              <p className="text-lg mt-6 font-semibold">Description</p> 

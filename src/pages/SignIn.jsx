@@ -63,8 +63,7 @@ password:""
                         <Link to="/sign-up" className='text-red-600 hover:text-red-700 transition duration-200'>Register</Link></p>
                            <p><Link to="/forgot-password" className='text-blue-600 hover:text-blue-800 transition 
                             duration-200 ease-in-out ml-1'>
-                                Forgot password?</Link></p> </div>
-                        
+                                Forgot password?</Link></p> </div>                       
                     </div>
                     <button type="submit" 
                     className='uppercase bg-blue-600 rounded w-full py-3 px-7 text-sm font-medium text-center mt-5 text-white'>
