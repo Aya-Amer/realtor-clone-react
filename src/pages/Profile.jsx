@@ -1,21 +1,23 @@
 import { getAuth, updateProfile } from 'firebase/auth';
-import { doc, updateDoc } from 'firebase/firestore';
-import React, { useState } from 'react'
+import { getDocs, collection, doc, orderBy, query, updateDoc, where } from 'firebase/firestore';
+import React, { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { db } from '../firebase';
 import { FcHome } from 'react-icons/fc';
+import ListingItem from '../components/ListingItem';
 
 export default function Profile() {
   const navigate = useNavigate();
   const auth = getAuth();
   const [editMode,setEditMode] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [listings, setListings] = useState(null);
   const [formData, setFormData] = useState({
     name:auth.currentUser.displayName,
     email: auth.currentUser.email,
-    
   })
-const {name,email} = formData;
+  const {name,email} = formData;
   function onSignOut(){
       auth.signOut();
       navigate("/");
@@ -50,9 +52,29 @@ const {name,email} = formData;
       [e.target.id]:e.target.value,
     }))
   }
-  function onSellOrRentHouse(){
-
+ 
+ useEffect(()=>{
+  async function fetchUserListings() {
+    const listingRef = collection(db, "listings");
+    const q = query(
+      listingRef,
+      where("userRef", "==", auth.currentUser.uid),
+      orderBy("timestamp", "desc")
+    );
+    const querySnap = await getDocs(q);
+    let listings = [];
+    querySnap.forEach((doc) => {
+      return listings.push({
+        id: doc.id,
+        data: doc.data(),
+      });
+    });
+    setListings(listings);
+    setLoading(false);
   }
+  fetchUserListings();
+ },[auth.currentUser.uid])
+ 
   return (
     <>
     <section className='mx-auto max-w-6xl flex justify-center items-center flex-col'>
@@ -75,7 +97,7 @@ const {name,email} = formData;
           className='text-blue-600  hover:text-blue-700 transition ease-in-out duration-200 cursor-pointer'>Sign out</button>
         </div>
         
-        <button type='submit' onClick={onSellOrRentHouse}
+        <button type='submit' 
         className=' w-full flex justify-center items-center py-3 px-7 text-sm font-medium shadow-md
          text-white hover:shadow-lg active:bg-blue-800 bg-blue-600 hover:bg-blue-700 border rounded 
          transition ease-in-out duration-200 cursor-pointer uppercase'>
@@ -85,7 +107,26 @@ const {name,email} = formData;
         
       </form>
       </div>
+      
     </section>
+    <div className="max-w-6xl px-3 mt-6 mx-auto">
+        {!loading && listings.length > 0 && (
+          <>
+            <h2 className="text-2xl text-center font-semibold mb-6">
+              My Listings
+            </h2>
+            <ul >
+              {listings.map((listing) => (
+                <ListingItem
+                  key={listing.id}
+                  id={listing.id}
+                  listing={listing.data}
+                />
+              ))}
+            </ul>
+          </>
+        )}
+      </div>
     </>
   )
 }
