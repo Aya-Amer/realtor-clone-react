@@ -32,8 +32,8 @@ export default function ListingItem({ listing, id, onDelete, onEdit }) {
             <div>{ listing.bathRoom > 1 ? `${listing.bathRoom} Baths`: "1 Bath"}</div>
         </div>
         <div className="flex space-x-1">
-            <FaPen className='text-sm font-thin cursor-pointer' onClick={()=>onEdit(listing.id)}/> 
-            <MdDelete className='text-red-500 cursor-pointer' onClick={()=>onDelete(listing.id)}/>
+            {onEdit && (<FaPen className='text-sm font-thin cursor-pointer' onClick={()=>onEdit(listing.id)}/> )}
+           {onDelete && (<MdDelete className='text-red-500 cursor-pointer' onClick={()=>onDelete(listing.id)}/>)} 
         </div>
       </div>     
     </li>
