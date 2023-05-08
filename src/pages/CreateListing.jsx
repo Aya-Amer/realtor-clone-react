@@ -240,7 +240,7 @@ export default function CreateListing() {
             <p className='text-md font-normal text-gray-600'>The first image will be the cover (max 6)</p>
             <div className='w-full py-1 px-2 bg-white border border-gray-300'>
             <input type="file" id="images"
-            onChange={onChange} multiple required accept=".png, .gif, .jpeg"/></div>
+            onChange={onChange} multiple required accept=".png, .gif, .jpeg,.jpg"/></div>
             <button type="submit" className='uppercase w-full py-2 px-4 text-white bg-blue-600 focus:bg-blue-700
             focus:text-white transition duration-150 ease-in-out border rounded my-6 text-center'>Create Listing</button>            
         </form>

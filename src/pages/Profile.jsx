@@ -98,7 +98,7 @@ export default function Profile() {
         </div>
         
         <button type='submit' 
-        className=' w-full flex justify-center items-center py-3 px-7 text-sm font-medium shadow-md
+        className=' w-full flex justify-center items-center py-3 px-7 text-sm font-medium shadow-md mt-2
          text-white hover:shadow-lg active:bg-blue-800 bg-blue-600 hover:bg-blue-700 border rounded 
          transition ease-in-out duration-200 cursor-pointer uppercase'>
           <Link to="/create-listing" className="flex justify-center items-center">
@@ -115,7 +115,7 @@ export default function Profile() {
             <h2 className="text-2xl text-center font-semibold mb-6">
               My Listings
             </h2>
-            <ul >
+            <ul className='grid md:grid-cols-2  sm:grid-cols-1 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-5'>
               {listings.map((listing) => (
                 <ListingItem
                   key={listing.id}
